@@ -1,0 +1,981 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title> </title>
+
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<style>
+:root {
+  color-scheme: light;
+
+  --bg: #f7f9fc;
+  --surface: #ffffff;
+  --ink: #172b4d;
+  --muted: #718096;
+  --line: #e8edf4;
+
+  --have: #2878d4;
+  --none: #e5eaf1;
+
+  --hi: #159b76;
+  --lo: #e58a36;
+
+  --shadow: 0 4px 20px rgba(35,65,105,.045);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'IBM Plex Sans Thai', system-ui, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.w {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 22px 45px;
+}
+
+h1 {
+  font-size: clamp(1.4rem,4vw,2rem);
+  margin: 0 0 4px;
+  line-height: 1.4;
+  font-weight: 700;
+  letter-spacing: -.4px;
+}
+
+h2 {
+  font-size: 1.05rem;
+  margin: 0 0 10px;
+  font-weight: 600;
+}
+
+p {
+  margin-top: 5px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+  align-items: center;
+}
+
+select,
+button {
+  font: inherit;
+  padding: 10px 15px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  transition: all .2s ease;
+}
+
+select {
+  min-width: 180px;
+  cursor: pointer;
+  outline: none;
+}
+
+select:focus {
+  border-color: var(--have);
+  box-shadow: 0 0 0 3px rgba(40,120,212,.1);
+}
+
+button {
+  background: var(--have);
+  border-color: var(--have);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1d65b5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40,120,212,.18);
+}
+
+button:disabled {
+  opacity: .6;
+  cursor: wait;
+  transform: none;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 22px;
+  margin-top: 18px;
+  box-shadow: var(--shadow);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0,420px) 1fr;
+  gap: 32px;
+  align-items: center;
+  background: linear-gradient(115deg,#ffffff 65%,#f1f7ff 100%);
+}
+
+@media(max-width:720px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dw {
+  position: relative;
+  max-width: 320px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.ctr {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  text-align: center;
+  padding: 0 24%;
+}
+
+.ctr b {
+  font-size: clamp(2rem,6vw,2.8rem);
+  color: var(--have);
+  line-height: 1.1;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ctr span {
+  color: var(--muted);
+  font-size: .8rem;
+  line-height: 1.4;
+}
+
+.key {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 13px 0;
+  font-size: 13px;
+}
+
+.sw {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  flex: none;
+  margin-top: 5px;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(210px,1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 17px 18px;
+  box-shadow: var(--shadow);
+  transition: transform .2s, box-shadow .2s;
+}
+
+.kpi:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(35,65,105,.08);
+}
+
+.kpi span {
+  color: var(--muted);
+  font-size: .82rem;
+  display: block;
+  line-height: 1.6;
+  min-height: 40px;
+}
+
+.kpi b {
+  display: block;
+  font-size: clamp(1.3rem,3vw,1.65rem);
+  color: var(--ink);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-top: 7px;
+  overflow-wrap: anywhere;
+}
+
+.ins {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.ins div {
+  border-left: 4px solid var(--have);
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 15px 17px;
+  border-top: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.ins .g {
+  border-left-color: var(--hi);
+}
+
+.ins .r {
+  border-left-color: var(--lo);
+}
+
+.ins b {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(120px,190px) minmax(60px,1fr) 90px;
+  gap: 12px;
+  align-items: center;
+  margin: 13px 0;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+}
+
+.track {
+  position: relative;
+  height: 12px;
+  background: var(--none);
+  border-radius: 30px;
+  overflow: visible;
+}
+
+.fill {
+  height: 100%;
+  background: linear-gradient(90deg,#62a7e9,#2878d4);
+  border-radius: 30px;
+  transition: width .5s ease;
+}
+
+.row.top .fill {
+  background: linear-gradient(90deg,#41bf98,#159b76);
+}
+
+.row.low .fill {
+  background: linear-gradient(90deg,#f2b574,#e58a36);
+}
+
+.avg {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: #24364d;
+  opacity: .7;
+  z-index: 2;
+}
+
+.row small {
+  color: var(--muted);
+  text-align: right;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.wrap {
+  position: relative;
+  height: 280px;
+  width: 100%;
+}
+
+#msg {
+  color: #d65b42;
+  font-size: 13px;
+}
+
+.footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 11px;
+  padding: 30px 0 0;
+}
+
+@media(max-width:720px) {
+  .w {
+    padding: 20px 14px 35px;
+  }
+
+  .hero {
+    gap: 22px;
+    padding: 20px;
+  }
+
+  .ins {
+    grid-template-columns: 1fr;
+  }
+
+  .row {
+    grid-template-columns: 95px minmax(40px,1fr) 75px;
+    gap: 8px;
+  }
+
+  .row span {
+    font-size: 11px;
+  }
+
+  .row small {
+    font-size: 10px;
+  }
+
+  .wrap {
+    height: 250px;
+  }
+}
+
+@media(max-width:420px) {
+  .kpis {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 9px;
+  }
+
+  .kpi {
+    padding: 13px;
+  }
+
+  .kpi span {
+    font-size: 11px;
+  }
+
+  .kpi b {
+    font-size: 19px;
+  }
+
+  .bar {
+    align-items: stretch;
+  }
+
+  .bar select,
+  .bar button {
+    flex: 1;
+  }
+
+  .wrap {
+    height: 230px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="w">
+
+  <h1>ความอิ่มตัวของการขยายสาขาเทียบกับประชากร</h1>
+  <p class="muted" id="sub">ข้อมูลจาก BigQuery</p>
+
+  <div class="bar">
+    <select id="region" aria-label="เขต"></select>
+    <button id="reload">↻ รีเฟรชข้อมูล</but  ton>
+  </div>
+
+  <div id="msg" role="alert"></div>
+
+  <section class="card hero">
+
+    <div class="dw">
+      <canvas id="donut" role="img" aria-label="สัดส่วนผู้มีสิทธิหลักประกันสุขภาพแห่งชาติ"></canvas>
+      <div class="ctr">
+        <b id="cpct">-</b>
+        <span>มีสิทธิหลักประกันสุขภาพแห่งชาติ</span>
+      </div>
+    </div>
+
+    <div>
+      <h2 id="heroT"></h2>
+      <p id="heroP" class="muted"></p>
+
+      <div class="key">
+        <span class="sw" style="background:var(--have)"></span>
+        <span id="k1"></span>
+      </div>
+
+      <div class="key">
+        <span class="sw" style="background:var(--none)"></span>
+        <span id="k2"></span>
+      </div>
+    </div>
+
+  </section>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="ins" id="ins"></div>
+
+  <section class="card">
+
+    <h2>เปรียบเทียบรายเขต: สัดส่วนผู้มีสิทธิหลักประกันสุขภาพแห่งชาติ (%)</h2>
+
+    <p class="muted">
+      เส้นดำคือค่าเฉลี่ยทั้งประเทศ ส่วนตัวเลขขวาคือจำนวนร้านเป้าหมาย
+    </p>
+
+    <div id="rank"></div>
+
+  </section>
+
+  <section class="card">
+
+    <h2>ผู้มีสิทธิหลักประกันสุขภาพแห่งชาติ รายเดือน</h2>
+
+    <p class="muted" id="trendNote"></p>
+
+    <div class="wrap">
+      <canvas id="trend"></canvas>
+    </div>
+
+  </section>
+
+  <div class="footer">
+    National Health Coverage Dashboard
+  </div>
+
+</div>
+
+<script>
+
+const fmt = n =>
+  Number(n || 0).toLocaleString('th-TH', {
+    maximumFractionDigits: 0
+  });
+
+const css = n =>
+  getComputedStyle(document.documentElement)
+    .getPropertyValue(n).trim();
+
+let rows = [];
+let chart = null;
+let donut = null;
+
+const $ = id => document.getElementById(id);
+
+const escapeHTML = value =>
+  String(value ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[c]);
+
+/* LOAD DATA */
+
+async function load() {
+
+  $('msg').textContent = '';
+
+  $('reload').disabled = true;
+  $('reload').textContent = 'กำลังโหลด...';
+
+  try {
+
+    const r = await fetch('/api/data');
+
+    if (!r.ok) throw new Error(r.status);
+
+    const data = await r.json();
+
+    if (!Array.isArray(data)) {
+      throw new Error('รูปแบบข้อมูลไม่ถูกต้อง');
+    }
+
+    rows = data.filter(x =>
+      Number(x.dopa_registered_population) > 0
+    );
+
+    if (!rows.length) {
+      throw new Error('ไม่พบข้อมูลประชากร');
+    }
+
+    init();
+    draw();
+
+  } catch (e) {
+
+    console.error(e);
+
+    $('msg').textContent =
+      'โหลดข้อมูลไม่สำเร็จ ตรวจสอบสิทธิ์บน BigQuery แล้วลองใหม่ (' +
+      e.message + ')';
+
+  } finally {
+
+    $('reload').disabled = false;
+    $('reload').textContent = '↻ รีเฟรชข้อมูล';
+
+  }
+
+}
+
+/* INITIALIZE */
+
+function init() {
+
+  const cur = $('region').value;
+
+  const regs = [
+    ...new Map(
+      rows.map(r => [r.region_id, r.region_name])
+    ).entries()
+  ].sort((a, b) => Number(a[0]) - Number(b[0]));
+
+  $('region').innerHTML =
+    '<option value="all">ทั้งประเทศ</option>' +
+    regs.map(([i, n]) =>
+      `<option value="${escapeHTML(i)}">${escapeHTML(n)}</option>`
+    ).join('');
+
+  if (
+    cur &&
+    [...$('region').options].some(o => o.value === cur)
+  ) {
+    $('region').value = cur;
+  }
+
+}
+
+const S = (a, k) =>
+  a.reduce((s, r) => s + (Number(r[k]) || 0), 0);
+
+/* MAIN DASHBOARD */
+
+function draw() {
+
+  if (!rows.length) return;
+
+  const rid = $('region').value;
+
+  const name =
+    $('region').selectedOptions[0]?.textContent || 'ทั้งประเทศ';
+
+  const last = Math.max(
+    ...rows.map(r => Number(r.month_no))
+  );
+
+  const lastRow = rows.find(
+    r => Number(r.month_no) === last
+  );
+
+  if (!lastRow) return;
+
+  const lastName = lastRow.month_name;
+
+  const f = rows.filter(r =>
+    rid === 'all' || String(r.region_id) === rid
+  );
+
+  const cur = f.filter(r =>
+    Number(r.month_no) === last
+  );
+
+  if (!cur.length) {
+    $('msg').textContent = 'ไม่พบข้อมูลในพื้นที่ที่เลือก';
+    return;
+  }
+
+  const uc = S(cur, 'ucinfo_population');
+  const dp = S(cur, 'dopa_registered_population');
+  const st = S(cur, 'target_store_count');
+
+  const pct = dp > 0 ? uc / dp * 100 : 0;
+  const other = Math.max(dp - uc, 0);
+
+  /* HEADER */
+
+  $('sub').textContent =
+    'ข้อมูลเดือน ' + lastName + ' | ' + name;
+
+  /* HERO */
+
+  $('heroT').textContent =
+    'สัดส่วนผู้มีสิทธิหลักประกันสุขภาพแห่งชาติ ใน' +
+    (rid === 'all' ? 'ทั้งประเทศ' : name);
+
+  $('heroP').textContent =
+    'จากประชากรตามทะเบียนราษฎร์ทั้งหมด ' +
+    fmt(dp) + ' คน';
+
+  $('cpct').textContent = pct.toFixed(1) + '%';
+
+  $('k1').textContent =
+    'ผู้มีสิทธิหลักประกันสุขภาพแห่งชาติ: ' +
+    fmt(uc) + ' คน (' + pct.toFixed(1) + '%)';
+
+  $('k2').textContent =
+    'ผู้มีสิทธิประกันสุขภาพอื่น (ประกันสังคม สวัสดิการข้าราชการ ฯลฯ): ' +
+    fmt(other) + ' คน (' +
+    (dp > 0 ? (other / dp * 100) : 0).toFixed(1) + '%)';
+
+  /* DONUT */
+
+  if (donut) donut.destroy();
+
+  donut = new Chart('donut', {
+
+    type: 'doughnut',
+
+    data: {
+
+      labels: [
+        'ผู้มีสิทธิหลักประกันสุขภาพแห่งชาติ',
+        'ผู้มีสิทธิประกันสุขภาพอื่น'
+      ],
+
+      datasets: [{
+        data: [uc, other],
+
+        backgroundColor: [
+          css('--have'),
+          css('--none')
+        ],
+
+        borderWidth: 0,
+        hoverOffset: 8,
+        spacing: 3,
+        borderRadius: 4
+      }]
+
+    },
+
+    options: {
+
+      responsive: true,
+      cutout: '72%',
+
+      plugins: {
+
+        legend: {
+          display: false
+        },
+
+        tooltip: {
+
+          callbacks: {
+            label: c => ' ' + fmt(c.parsed) + ' คน'
+          }
+
+        }
+
+      }
+
+    }
+
+  });
+
+  /* KPI */
+
+  $('kpis').innerHTML = [
+
+    ['ประชากรทะเบียนราษฎร์ (กรมการปกครอง)', fmt(dp)],
+
+    ['ผู้มีสิทธิหลักประกันสุขภาพแห่งชาติ (สปสช.)', fmt(uc)],
+
+    ['ผู้มีสิทธิอื่น (กรมการปกครอง − สปสช.)', fmt(other)],
+
+    ['สาขาเป้าหมายอิ่มตัว', fmt(st)]
+
+  ].map(([t, v]) => `
+    <div class="kpi">
+      <span>${t}</span>
+      <b>${v}</b>
+    </div>
+  `).join('');
+
+  /* REGIONAL RANKING */
+
+  const all = rows.filter(r =>
+    Number(r.month_no) === last
+  );
+
+  const natDp = S(all, 'dopa_registered_population');
+  const natUc = S(all, 'ucinfo_population');
+
+  const natAvg = natDp > 0
+    ? natUc / natDp * 100
+    : 0;
+
+  const reg = [
+    ...new Map(
+      all.map(r => [r.region_id, r.region_name])
+    ).entries()
+  ].map(([id, nm]) => {
+
+    const a = all.filter(r =>
+      String(r.region_id) === String(id)
+    );
+
+    const d = S(a, 'dopa_registered_population');
+    const u = S(a, 'ucinfo_population');
+
+    return {
+      nm,
+      p: d > 0 ? u / d * 100 : 0,
+      st: S(a, 'target_store_count')
+    };
+
+  }).sort((a, b) => b.p - a.p);
+
+  if (!reg.length) {
+    $('rank').innerHTML = '<p class="muted">ไม่พบข้อมูลรายเขต</p>';
+  } else {
+
+    const hi = reg[0];
+    const lo = reg[reg.length - 1];
+
+    $('rank').innerHTML = reg.map((x, i) => `
+
+      <div class="row ${
+        i === 0 ? 'top' :
+        i === reg.length - 1 ? 'low' : ''
+      }">
+
+        <span>${escapeHTML(x.nm)}</span>
+
+        <div class="track">
+
+          <div class="fill"
+            style="width:${Math.max(0, Math.min(x.p, 100))}%">
+          </div>
+
+          <div class="avg"
+            style="left:${Math.max(0, Math.min(natAvg, 100))}%"
+            title="ค่าเฉลี่ยประเทศ ${natAvg.toFixed(1)}%">
+          </div>
+
+        </div>
+
+        <small>${x.p.toFixed(1)}% | ${fmt(x.st)}</small>
+
+      </div>
+
+    `).join('');
+
+  }
+
+  /* MONTHLY TREND */
+
+  const months = [
+    ...new Map(
+      f.map(r => [Number(r.month_no), r.month_name])
+    ).entries()
+  ].sort((a, b) => a[0] - b[0]);
+
+  const series = months.map(([no]) =>
+    S(
+      f.filter(r => Number(r.month_no) === no),
+      'ucinfo_population'
+    )
+  );
+
+  const first = series[0] || 0;
+  const latest = series[series.length - 1] || 0;
+
+  const chg = first > 0
+    ? (latest - first) / first * 100
+    : 0;
+
+  $('trendNote').textContent = months.length
+    ? 'ข้อมูลตั้งแต่ ' + months[0][1] +
+      ' ถึง ' + months[months.length - 1][1]
+    : 'ไม่พบข้อมูลรายเดือน';
+
+  if (chart) chart.destroy();
+
+  chart = new Chart('trend', {
+
+    type: 'line',
+
+    data: {
+
+      labels: months.map(m => m[1]),
+
+      datasets: [{
+
+        label: 'ผู้มีสิทธิหลักประกันสุขภาพแห่งชาติ',
+
+        data: series,
+
+        borderColor: css('--have'),
+        backgroundColor: css('--have'),
+
+        borderWidth: 3,
+        tension: .3,
+        fill: false,
+
+        pointRadius: 3,
+        pointHoverRadius: 7,
+        pointBackgroundColor: css('--have'),
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2
+
+      }]
+
+    },
+
+    options: {
+
+      responsive: true,
+      maintainAspectRatio: false,
+
+      interaction: {
+        intersect: false,
+        mode: 'index'
+      },
+
+      plugins: {
+
+        legend: {
+          display: false
+        },
+
+        tooltip: {
+
+          backgroundColor: '#172b4d',
+          padding: 12,
+          cornerRadius: 8,
+
+          callbacks: {
+            label: c => ' ' + fmt(c.parsed.y) + ' คน'
+          }
+
+        }
+
+      },
+
+      scales: {
+
+        x: {
+          grid: {
+            display: false
+          },
+          border: {
+            display: false
+          },
+          ticks: {
+            color: css('--muted'),
+            font: {
+              family: 'IBM Plex Sans Thai'
+            }
+          }
+        },
+
+        y: {
+
+          beginAtZero: false,
+
+          border: {
+            display: false
+          },
+
+          grid: {
+            color: css('--line')
+          },
+
+          ticks: {
+            color: css('--muted'),
+            callback: v => fmt(v),
+            font: {
+              family: 'IBM Plex Sans Thai'
+            }
+          }
+
+        }
+
+      }
+
+    }
+
+  });
+
+  /* INSIGHTS */
+
+  const trendText =
+    months.length < 2 || first <= 0
+      ? 'ข้อมูลไม่เพียงพอ'
+      : (chg < 0 ? 'ลดลง ' : 'เพิ่มขึ้น ') +
+        Math.abs(chg).toFixed(1) + '%';
+
+  if (reg.length) {
+
+    $('ins').innerHTML =
+
+      `<div class="g">
+        <b>ครอบคลุมสูงสุด</b><br>
+        ${escapeHTML(reg[0].nm)}
+        (${reg[0].p.toFixed(1)}%)
+      </div>` +
+
+      `<div class="r">
+        <b>ครอบคลุมต่ำสุด</b><br>
+        ${escapeHTML(reg[reg.length - 1].nm)}
+        (${reg[reg.length - 1].p.toFixed(1)}%)
+      </div>` +
+
+      `<div>
+        <b>แนวโน้ม ${
+          months.length ? escapeHTML(months[0][1]) : ''
+        } ถึง ${
+          months.length ? escapeHTML(months[months.length - 1][1]) : ''
+        }</b><br>
+        ${trendText} (${escapeHTML(name)})
+      </div>`;
+
+  } else {
+
+    $('ins').innerHTML = '';
+
+  }
+
+}
+
+/* EVENTS */
+
+$('region').addEventListener('change', draw);
+$('reload').addEventListener('click', load);
+
+/* START */
+
+load();
+
+</script>
+
+</body>
+</html>
